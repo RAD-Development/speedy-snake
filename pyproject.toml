@@ -1,0 +1,55 @@
+[tool.poetry]
+name = "speedysnake"
+version = "0.1.0"
+description = ""
+authors = ["Richie Cahill <Richie@tmmworkshop.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">3.9"
+
+[tool.poetry.group.dev.dependencies]
+mypy = "*"
+pytest = "*"
+pytest-cov = "*"
+pytest-mock = "*"
+ruff = "*"
+setuptools = "*"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+
+line-length = 100
+indent-width = 4
+
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "ANN101", # (perm) this rule is deprecated
+    "ANN102", # (perm) this rule is deprecated
+    "G004",   # (perm) this is a performance nit
+]
+
+[tool.ruff.lint.per-file-ignores]
+
+"tests/**" = [
+    "S101", # (perm) pytest needs asserts
+]
+
+fixable = ["ALL"]
+unfixable = []
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.pycodestyle]
+max-line-length = 120
+
+[tool.ruff.lint.pylint]
+max-args = 9
