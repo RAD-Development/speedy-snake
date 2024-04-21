@@ -5,13 +5,11 @@ from __future__ import annotations
 import logging
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from dataclasses import dataclass
-from functools import partial
 from multiprocessing import cpu_count
 from typing import TYPE_CHECKING, Any, Generic, ParamSpec, TypeVar
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping, Sequence
-    from concurrent.futures import Executor
 
 P = ParamSpec("P")
 R = TypeVar("R")
@@ -30,17 +28,13 @@ class ExecutorResults(Generic[R]):
 
 
 def _executor_base(
-    executor_type: type[Executor],
+    executor_type: type[ProcessPoolExecutor | ThreadPoolExecutor],
     func: Callable[..., R],
     kwargs_list: Sequence[Mapping[str, Any]],
-    kwargs: Mapping[str, Any] | None,
-    max_workers: int,
+    max_workers: int | None,
     progress_tracker: int | None,
 ) -> ExecutorResults:
     total_work = len(kwargs_list)
-
-    if kwargs:
-        func = partial(func, **kwargs)
 
     with executor_type(max_workers=max_workers) as executor:
         futures = [executor.submit(func, **kwarg) for kwarg in kwargs_list]
@@ -64,8 +58,7 @@ def _executor_base(
 def thread_executor(
     func: Callable[..., R],
     kwargs_list: Sequence[Mapping[str, Any]],
-    kwargs: Mapping[str, Any] | None = None,
-    max_workers: int = 8,
+    max_workers: int | None = None,
     progress_tracker: int | None = None,
 ) -> ExecutorResults:
     """Generic function to run a function with multiple arguments in threads.
@@ -75,9 +68,7 @@ def thread_executor(
     Args:
         func (Callable[..., R]): Function to run in threads.
         kwargs_list (Sequence[Mapping[str, Any]]): List of dictionaries with the arguments for the function.
-        kwargs (Mapping[str, Any], optional): Default arguments for the function. Defaults to None.
         max_workers (int, optional): Number of workers to use. Defaults to 8.
-        exception_behavior (str, optional): How to handle exceptions. Defaults to "group".
         progress_tracker (int, optional): Number of tasks to complete before logging progress.
 
     Returns:
@@ -87,7 +78,6 @@ def thread_executor(
         executor_type=ThreadPoolExecutor,
         func=func,
         kwargs_list=kwargs_list,
-        kwargs=kwargs,
         max_workers=max_workers,
         progress_tracker=progress_tracker,
     )
@@ -96,8 +86,7 @@ def thread_executor(
 def process_executor(
     func: Callable[..., R],
     kwargs_list: Sequence[Mapping[str, Any]],
-    kwargs: Mapping[str, Any] | None = None,
-    max_workers: int = 4,
+    max_workers: int | None = None,
     progress_tracker: int | None = None,
 ) -> ExecutorResults:
     """Generic function to run a function with multiple arguments in process.
@@ -107,22 +96,19 @@ def process_executor(
     Args:
         func (Callable[..., R]): Function to run in process.
         kwargs_list (Sequence[Mapping[str, Any]]): List of dictionaries with the arguments for the function.
-        kwargs (Mapping[str, Any], optional): Default arguments for the function. Defaults to None.
         max_workers (int, optional): Number of workers to use. Defaults to 4.
-        exception_behavior (str, optional): How to handle exceptions. Defaults to "group".
         progress_tracker (int, optional): Number of tasks to complete before logging progress.
 
     Returns:
         tuple[list[R], list[Exception]]: List with the results and a list with the exceptions.
     """
-    if max_workers > cpu_count():
+    if max_workers and max_workers > cpu_count():
         error = f"max_workers must be less than or equal to {cpu_count()}"
         raise RuntimeError(error)
 
     return process_executor_unchecked(
         func=func,
         kwargs_list=kwargs_list,
-        kwargs=kwargs,
         max_workers=max_workers,
         progress_tracker=progress_tracker,
     )
@@ -131,8 +117,7 @@ def process_executor(
 def process_executor_unchecked(
     func: Callable[..., R],
     kwargs_list: Sequence[Mapping[str, Any]],
-    kwargs: Mapping[str, Any] | None,
-    max_workers: int,
+    max_workers: int | None,
     progress_tracker: int | None,
 ) -> ExecutorResults:
     """Generic function to run a function with multiple arguments in parallel.
@@ -144,9 +129,7 @@ def process_executor_unchecked(
     Args:
         func (Callable[..., R]): Function to run in parallel.
         kwargs_list (Sequence[Mapping[str, Any]]): List of dictionaries with the arguments for the function.
-        kwargs (Mapping[str, Any], optional): Default arguments for the function. Defaults to None.
         max_workers (int, optional): Number of workers to use. Defaults to 8.
-        exception_behavior (str, optional): How to handle exceptions. Defaults to "group".
         progress_tracker (int, optional): Number of tasks to complete before logging progress.
 
     Returns:
@@ -156,7 +139,6 @@ def process_executor_unchecked(
         executor_type=ProcessPoolExecutor,
         func=func,
         kwargs_list=kwargs_list,
-        kwargs=kwargs,
         max_workers=max_workers,
         progress_tracker=progress_tracker,
     )

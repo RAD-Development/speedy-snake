@@ -19,15 +19,6 @@ def test_thread_executor() -> None:
     assert not results.exceptions
 
 
-def test_thread_executor_currying() -> None:
-    """test_thread_executor."""
-    kwargs = {"b": 2}
-    kwargs_list = [{"a": 1}, {"a": 3}, {"a": 3, "b": 4}]
-    results = thread_executor(func=add, kwargs_list=kwargs_list, kwargs=kwargs)
-    assert results.results == [3, 5, 7]
-    assert not results.exceptions
-
-
 def test_thread_executor_exception() -> None:
     """test_thread_executor."""
     kwargs_list = [{"a": 1, "b": 2}, {"a": 3, "b": None}]

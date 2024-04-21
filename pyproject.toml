@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "speedysnake"
+name = "speedy_snake"
 version = "0.1.0"
 description = ""
 authors = ["Richie Cahill <Richie@tmmworkshop.com>"]
