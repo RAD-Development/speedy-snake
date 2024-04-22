@@ -6,12 +6,11 @@ import logging
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from dataclasses import dataclass
 from multiprocessing import cpu_count
-from typing import TYPE_CHECKING, Any, Generic, ParamSpec, TypeVar
+from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping, Sequence
 
-P = ParamSpec("P")
 R = TypeVar("R")
 
 
@@ -63,8 +62,6 @@ def thread_executor(
 ) -> ExecutorResults:
     """Generic function to run a function with multiple arguments in threads.
 
-    Note: when using currying the arguments being curried can be overwritten by the arguments in kwargs_list.
-
     Args:
         func (Callable[..., R]): Function to run in threads.
         kwargs_list (Sequence[Mapping[str, Any]]): List of dictionaries with the arguments for the function.
@@ -90,8 +87,6 @@ def process_executor(
     progress_tracker: int | None = None,
 ) -> ExecutorResults:
     """Generic function to run a function with multiple arguments in process.
-
-    Note: when using currying the arguments being curried can be overwritten by the arguments in kwargs_list.
 
     Args:
         func (Callable[..., R]): Function to run in process.
@@ -122,7 +117,6 @@ def process_executor_unchecked(
 ) -> ExecutorResults:
     """Generic function to run a function with multiple arguments in parallel.
 
-    Note: when using currying the arguments being curried can be overwritten by the arguments in kwargs_list.
     Note: this function does not check if the number of workers is greater than the number of CPUs.
     This can cause the system to become unresponsive.
 
