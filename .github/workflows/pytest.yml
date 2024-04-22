@@ -27,7 +27,6 @@ jobs:
           - "pypy-3.10"
         architecture:
           - x64
-          - x86
 
     steps:
       - name: Checkout repo
