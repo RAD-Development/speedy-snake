@@ -9,8 +9,8 @@ on:
       - main
 
 jobs:
-  run-test:
-    name: test-${{ matrix.python-version }}-${{ matrix.build-type }}-${{ matrix.architecture }}-${{ matrix.os }}
+  run-test-x86-64:
+    name: test-${{ matrix.python-version }}-x86-64-${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -24,8 +24,6 @@ jobs:
           - "3.11"
           - "3.12"
           - "pypy-3.10"
-        architecture:
-          - x64
 
     steps:
       - name: Checkout repo
@@ -35,7 +33,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-          architecture: ${{ matrix.architecture }}
 
       - name: Run image
         uses: abatilo/actions-poetry@v2
