@@ -41,12 +41,12 @@ def _executor_base(
     results = []
     exceptions = []
     for index, future in enumerate(futures, 1):
-        try:
-            results.append(future.result())
-        except Exception as error:
-            msg = f"{future} raised {error.__class__.__name__}"
-            logging.exception(msg)
-            exceptions.append(error)
+        if exception := future.exception():
+            logging.error(f"{future} raised {exception.__class__.__name__}")
+            exceptions.append(exception)
+            continue
+
+        results.append(future.result())
 
         if progress_tracker and index % progress_tracker == 0:
             logging.info(f"Progress: {index}/{total_work}")
