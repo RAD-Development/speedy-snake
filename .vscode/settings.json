@@ -3,10 +3,13 @@
   "python.testing.unittestEnabled": false,
   "python.testing.pytestEnabled": true,
   "cSpell.words": [
+    "abatilo",
     "mypy",
     "pycodestyle",
     "pydocstyle",
     "pylint",
+    "pypi",
+    "pypy",
     "pytest",
     "setuptools",
     "unfixable"
