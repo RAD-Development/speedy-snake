@@ -40,13 +40,18 @@ def test_process_executor_to_many_max_workers(mocker: MockerFixture) -> None:
     """test_process_executor."""
     mocker.patch(target="speedy_snake.cpu_count", return_value=1)
 
-    with pytest.raises(RuntimeError) as exc_info:
+    with pytest.raises(RuntimeError, match="max_workers must be less than or equal to 1"):
         process_executor(func=add, kwargs_list=[{"a": 1, "b": 2}], max_workers=8)
-
-    assert str(exc_info.value) == "max_workers must be less than or equal to 1"
 
 
 def test_executor_results_repr() -> None:
     """test_ExecutorResults_repr."""
     results = thread_executor(func=add, kwargs_list=[{"a": 1, "b": 2}])
     assert repr(results) == "results=[3] exceptions=[]"
+
+
+def test_early_error() -> None:
+    """test_early_error."""
+    kwargs_list = [{"a": 1, "b": 2}, {"a": 3, "b": None}]
+    with pytest.raises(TypeError, match=r"unsupported operand type\(s\) for \+\: 'int' and 'NoneType'"):
+        thread_executor(func=add, kwargs_list=kwargs_list, mode="early_error")

@@ -6,12 +6,14 @@ import logging
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from dataclasses import dataclass
 from multiprocessing import cpu_count
-from typing import TYPE_CHECKING, Any, Generic, TypeVar
+from typing import TYPE_CHECKING, Any, Generic, Literal, TypeVar
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping, Sequence
 
 R = TypeVar("R")
+
+modes = Literal["normal", "early_error"]
 
 
 @dataclass
@@ -32,6 +34,7 @@ def _executor_base(
     kwargs_list: Sequence[Mapping[str, Any]],
     max_workers: int | None,
     progress_tracker: int | None,
+    mode: modes = "normal",
 ) -> ExecutorResults:
     total_work = len(kwargs_list)
 
@@ -44,6 +47,9 @@ def _executor_base(
         if exception := future.exception():
             logging.error(f"{future} raised {exception.__class__.__name__}")
             exceptions.append(exception)
+            if mode == "early_error":
+                executor.shutdown(wait=False)
+                raise exception
             continue
 
         results.append(future.result())
@@ -59,6 +65,7 @@ def thread_executor(
     kwargs_list: Sequence[Mapping[str, Any]],
     max_workers: int | None = None,
     progress_tracker: int | None = None,
+    mode: modes = "normal",
 ) -> ExecutorResults:
     """Generic function to run a function with multiple arguments in threads.
 
@@ -67,6 +74,7 @@ def thread_executor(
         kwargs_list (Sequence[Mapping[str, Any]]): List of dictionaries with the arguments for the function.
         max_workers (int, optional): Number of workers to use. Defaults to 8.
         progress_tracker (int, optional): Number of tasks to complete before logging progress.
+        mode (modes, optional): Mode to use. Defaults to "normal".
 
     Returns:
         tuple[list[R], list[Exception]]: List with the results and a list with the exceptions.
@@ -77,6 +85,7 @@ def thread_executor(
         kwargs_list=kwargs_list,
         max_workers=max_workers,
         progress_tracker=progress_tracker,
+        mode=mode,
     )
 
 
@@ -85,6 +94,7 @@ def process_executor(
     kwargs_list: Sequence[Mapping[str, Any]],
     max_workers: int | None = None,
     progress_tracker: int | None = None,
+    mode: modes = "normal",
 ) -> ExecutorResults:
     """Generic function to run a function with multiple arguments in process.
 
@@ -93,6 +103,7 @@ def process_executor(
         kwargs_list (Sequence[Mapping[str, Any]]): List of dictionaries with the arguments for the function.
         max_workers (int, optional): Number of workers to use. Defaults to 4.
         progress_tracker (int, optional): Number of tasks to complete before logging progress.
+        mode (modes, optional): Mode to use. Defaults to "normal".
 
     Returns:
         tuple[list[R], list[Exception]]: List with the results and a list with the exceptions.
@@ -106,6 +117,7 @@ def process_executor(
         kwargs_list=kwargs_list,
         max_workers=max_workers,
         progress_tracker=progress_tracker,
+        mode=mode,
     )
 
 
@@ -114,6 +126,7 @@ def process_executor_unchecked(
     kwargs_list: Sequence[Mapping[str, Any]],
     max_workers: int | None,
     progress_tracker: int | None,
+    mode: modes = "normal",
 ) -> ExecutorResults:
     """Generic function to run a function with multiple arguments in parallel.
 
@@ -125,6 +138,7 @@ def process_executor_unchecked(
         kwargs_list (Sequence[Mapping[str, Any]]): List of dictionaries with the arguments for the function.
         max_workers (int, optional): Number of workers to use. Defaults to 8.
         progress_tracker (int, optional): Number of tasks to complete before logging progress.
+        mode (modes, optional): Mode to use. Defaults to "normal".
 
     Returns:
         tuple[list[R], list[Exception]]: List with the results and a list with the exceptions.
@@ -135,4 +149,5 @@ def process_executor_unchecked(
         kwargs_list=kwargs_list,
         max_workers=max_workers,
         progress_tracker=progress_tracker,
+        mode=mode,
     )
