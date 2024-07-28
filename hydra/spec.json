@@ -1,0 +1,35 @@
+{
+  "enabled": 1,
+  "hidden": false,
+  "description": "Nix template using poetry2nix",
+  "nixexprinput": "nixexpr",
+  "nixexprpath": "hydra/jobsets.nix",
+  "checkinterval": 60,
+  "schedulingshares": 100,
+  "enableemail": false,
+  "emailoverride": "",
+  "keepnr": 3,
+  "type": 0,
+  "inputs": {
+    "nixexpr": {
+      "value": "https://github.com/RAD-Development/speedy-snake main",
+      "type": "git",
+      "emailresponsible": false
+    },
+    "nixpkgs": {
+      "value": "https://github.com/NixOS/nixpkgs nixos-unstable",
+      "type": "git",
+      "emailresponsible": false
+    },
+    "pulls": {
+      "type": "githubpulls",
+      "value": "RAD-Development speedy-snake",
+      "emailresponsible": false
+    },
+    "branches": {
+      "type": "github_refs",
+      "value": "RAD-Development speedy-snake heads -",
+      "emailresponsible": false
+    }
+  }
+}
