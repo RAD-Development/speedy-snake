@@ -1,11 +1,8 @@
 name: pypi publish
 
 on:
-  workflow_run:
-    workflows: ["pytest"]
-    branches: [main]
-    types:
-      - completed
+  release:
+    types: [published]
 
 jobs:
   publish:
